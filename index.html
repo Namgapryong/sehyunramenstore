@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>세현이의 라면교실 - 3분 타임어택</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DungGeunMo&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #fdf0f5;
+      --panel-bg: #fff0f6;
+      --primary: #ff4785;
+      --primary-dark: #d62060;
+      --accent: #ff85a2;
+      --yellow: #ffd166;
+      --green: #06d6a0;
+      --dark: #2d3142;
+      --border-color: #ff9ebb;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      font-family: 'DungGeunMo', monospace;
+      color: var(--dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Game Container */
+    #game-container {
+      width: 900px;
+      height: 670px;
+      background: #ffffff;
+      border: 6px solid var(--primary);
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(255, 71, 133, 0.25);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header / HUD */
+    header {
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      padding: 10px 20px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 4px solid var(--primary-dark);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .github-logo {
+      width: 28px;
+      height: 28px;
+      fill: white;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+      letter-spacing: 1px;
+    }
+
+    .hud-stats {
+      display: flex;
+      gap: 15px;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.25);
+      padding: 6px 12px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-box.timer {
+      background: rgba(0, 0, 0, 0.25);
+      color: #ffe3ec;
+      border-color: #ff9ebb;
+    }
+
+    /* Main Play Area */
+    .play-area {
+      flex: 1;
+      display: flex;
+      padding: 15px;
+      gap: 15px;
+      background: #fffafc;
+      position: relative;
+    }
+
+    /* Left Sidebar: Character Sehyun & Quest Order */
+    .left-panel {
+      width: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sehyun-card {
+      background: var(--panel-bg);
+      border: 3px solid var(--border-color);
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+      position: relative;
+    }
+
+    .sehyun-avatar {
+      width: 90px;
+      height: 90px;
+      background: #ffe3ec;
+      border-radius: 50%;
+      margin: 0 auto 8px;
+      border: 3px solid var(--primary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 45px;
+      box-shadow: inset 0 0 10px rgba(255,71,133,0.2);
+    }
+
+    .speech-bubble {
+      background: white;
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 12px;
+      position: relative;
+      margin-top: 4px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      word-break: keep-all;
+    }
+
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 8px 10px 8px;
+      border-style: solid;
+      border-color: transparent transparent var(--primary) transparent;
+    }
+
+    .quest-card {
+      background: #ffffff;
+      border: 3px dashed var(--primary);
+      border-radius: 16px;
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .quest-title {
+      font-size: 14px;
+      color: var(--primary-dark);
+      font-weight: bold;
+      border-bottom: 2px solid #ffe3ec;
+      padding-bottom: 4px;
+    }
+
+    .quest-details {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #ff4785;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 11px;
+      margin-right: 4px;
+    }
+
+    /* Center: Cooking Stove & Pot */
+    .center-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* Cooking status indicator */
+    .cook-status-bar {
+      width: 100%;
+      background: #fff;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 6px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--primary-dark);
+    }
+
+    /* Pot & Stove Area */
+    .stove-area {
+      position: relative;
+      width: 280px;
+      height: 230px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .pot {
+      width: 220px;
+      height: 140px;
+      background: linear-gradient(180deg, #d1d5db, #9ca3af);
+      border-radius: 10px 10px 50px 50px;
+      border: 4px solid #4b5563;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+      z-index: 2;
+    }
+
+    .pot-handle-left, .pot-handle-right {
+      width: 24px;
+      height: 40px;
+      background: #374151;
+      border-radius: 6px;
+      position: absolute;
+      top: 30px;
+      z-index: 1;
+    }
+
+    .pot-handle-left { left: 6px; }
+    .pot-handle-right { right: 6px; }
+
+    /* Water inside pot */
+    .water {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 0%;
+      background: rgba(56, 189, 248, 0.75);
+      transition: height 0.3s ease, background-color 0.5s;
+    }
+
+    .water.boiling {
+      animation: boil 0.3s infinite alternate;
+    }
+
+    @keyframes boil {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-3px); }
+    }
+
+    /* Boiling Bubbles */
+    .bubbles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: none;
+    }
+
+    .pot.cooking .bubbles {
+      display: block;
+    }
+
+    .bubble {
+      position: absolute;
+      background: rgba(255,255,255,0.6);
+      border-radius: 50%;
+      animation: bubbleUp 0.8s infinite ease-in;
+    }
+
+    @keyframes bubbleUp {
+      0% { bottom: 10px; opacity: 1; transform: scale(0.5); }
+      100% { bottom: 80px; opacity: 0; transform: scale(1.3); }
+    }
+
+    /* Contents in Pot */
+    .pot-contents {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      padding: 0 10px;
+      z-index: 3;
+    }
+
+    .content-tag {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1.5px solid var(--primary);
+      border-radius: 8px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      animation: popIn 0.2s ease-out;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
+    /* Burner & Flames */
+    .burner {
+      width: 180px;
+      height: 20px;
+      background: #4b5563;
+      border-radius: 10px;
+      margin-top: -5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .flames {
+      position: absolute;
+      top: -25px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .flame {
+      font-size: 24px;
+      animation: flicker 0.2s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { transform: scale(0.9) translateY(0); }
+      100% { transform: scale(1.1) translateY(-4px); }
+    }
+
+    /* Fire Control Bar */
+    .fire-control {
+      background: #fff;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 8px 12px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fire-level-display {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--primary-dark);
+    }
+
+    .fire-btn-group {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .fire-btn {
+      flex: 1;
+      padding: 6px 0;
+      border: 2px solid #ccc;
+      background: #f3f4f6;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: bold;
+      transition: all 0.15s;
+    }
+
+    .fire-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary-dark);
+      box-shadow: 0 2px 6px rgba(255, 71, 133, 0.4);
+    }
+
+    /* Submit PR Button */
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #2ea44f, #238636);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(46, 164, 79, 0.3);
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #2c974b, #1f7a31);
+    }
+
+    .btn-submit:active {
+      transform: translateY(1px);
+    }
+
+    /* Right Panel: Ingredients Shelf */
+    .right-panel {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .shelf-section {
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 8px;
+    }
+
+    .shelf-title {
+      font-size: 12px;
+      color: var(--primary-dark);
+      font-weight: bold;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ingredient-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .ing-btn {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 11px;
+      transition: all 0.15s;
+    }
+
+    .ing-btn:hover {
+      border-color: var(--primary);
+      background: #fff0f6;
+      transform: scale(1.02);
+    }
+
+    .ing-btn:active {
+      transform: scale(0.96);
+    }
+
+    .ing-icon {
+      font-size: 20px;
+    }
+
+    /* Modal / Overlay */
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal {
+      background: white;
+      border: 5px solid var(--primary);
+      border-radius: 20px;
+      padding: 25px;
+      width: 460px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: modalPop 0.3s ease-out;
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 22px;
+      color: var(--primary-dark);
+      margin-bottom: 10px;
+    }
+
+    .score-breakdown {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: left;
+      font-size: 12px;
+      margin: 10px 0;
+      line-height: 1.6;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .total-score-badge {
+      font-size: 32px;
+      color: var(--primary);
+      font-weight: bold;
+      margin: 8px 0;
+    }
+
+    .history-list {
+      text-align: left;
+      font-size: 13px;
+      background: #fff0f6;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px 0;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px dashed #ffcdd2;
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .btn-action {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(255, 71, 133, 0.3);
+      transition: background 0.2s;
+    }
+
+    .btn-action:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Helper Utilities */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- Header / HUD -->
+    <header>
+      <div class="title-group">
+        <svg class="github-logo" viewBox="0 0 24 24">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        <h1>세현이의 라면교실</h1>
+      </div>
+      <div class="hud-stats">
+        <div class="stat-box timer">⏱️ 남은 시간: <span id="overall-timer">03:00</span></div>
+        <div class="stat-box">🍜 제출한 라면: <span id="hud-count">0</span></div>
+        <div class="stat-box">⭐ 누적 점수: <span id="hud-score">0</span>점</div>
+      </div>
+    </header>
+
+    <!-- Main Game Play Area -->
+    <div class="play-area">
+      <!-- Left Panel: Sehyun & Quest -->
+      <div class="left-panel">
+        <div class="sehyun-card">
+          <div class="sehyun-avatar" id="sehyun-face">👨‍🍳</div>
+          <div style="font-weight: bold; font-size: 14px; color: var(--primary-dark);">개발자 세현이</div>
+          <div class="speech-bubble" id="sehyun-dialogue">
+            "제한시간 3분 동안 최대한 많은 라면을 맛있게 끓여서 제출해줘!"
+          </div>
+        </div>
+
+        <div class="quest-card">
+          <div class="quest-title" id="quest-name">📋 [PR #1] 주문 확인 중...</div>
+          <div class="quest-details" id="quest-desc">
+            Loading recipe...
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Panel: Stove, Pot, Fire Controls -->
+      <div class="center-panel">
+        <div class="cook-status-bar" id="cook-status">
+          끓인 시간: 0.0초
+        </div>
+
+        <div class="stove-area">
+          <div class="pot-handle-left"></div>
+          <div class="pot-handle-right"></div>
+          <div class="pot" id="pot">
+            <div class="water" id="water"></div>
+            <div class="bubbles" id="bubbles">
+              <div class="bubble" style="left: 20%;"></div>
+              <div class="bubble" style="left: 45%;"></div>
+              <div class="bubble" style="left: 70%;"></div>
+            </div>
+            <div class="pot-contents" id="pot-contents"></div>
+          </div>
+          <div class="burner">
+            <div class="flames" id="flames">
+              <span class="flame">🔥</span>
+              <span class="flame">🔥</span>
+              <span class="flame">🔥</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5-Level Fire Control -->
+        <div class="fire-control">
+          <div class="fire-level-display" id="fire-status">🔥 불 세기: 끄기 (0단)</div>
+          <div class="fire-btn-group">
+            <button class="fire-btn" onclick="setFire(1)">1단</button>
+            <button class="fire-btn" onclick="setFire(2)">2단</button>
+            <button class="fire-btn" onclick="setFire(3)">3단</button>
+            <button class="fire-btn" onclick="setFire(4)">4단</button>
+            <button class="fire-btn" onclick="setFire(5)">5단</button>
+          </div>
+        </div>
+
+        <button class="btn-submit" onclick="submitPR()">🚀 PR 제출하기 (Create PR)</button>
+      </div>
+
+      <!-- Right Panel: Ingredient Shelves -->
+      <div class="right-panel">
+        <!-- Water Shelf -->
+        <div class="shelf-section">
+          <div class="shelf-title">💧 [기본] 물 조절</div>
+          <div class="ingredient-grid">
+            <button class="ing-btn" onclick="addWater(100)">
+              <span class="ing-icon">💧</span>
+              <span>물 100ml</span>
+            </button>
+            <button class="ing-btn" onclick="addWater(200)">
+              <span class="ing-icon">🚰</span>
+              <span>물 200ml</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Noodle Shelf -->
+        <div class="shelf-section">
+          <div class="shelf-title">🍜 [기본] 면 사리</div>
+          <div class="ingredient-grid">
+            <button class="ing-btn" onclick="addIngredient('면 사리', 'noodle')">
+              <span class="ing-icon">🍜</span>
+              <span>꼬불면 넣기</span>
+            </button>
+            <button class="ing-btn" onclick="clearPot()" style="background:#fff0f0; border-color:#ffcdd2;">
+              <span class="ing-icon">🗑️</span>
+              <span>냄비 비우기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dedicated Sauce Shelf -->
+        <div class="shelf-section">
+          <div class="shelf-title">🌶️ [선택] 전용 스프 선반</div>
+          <div class="ingredient-grid">
+            <button class="ing-btn" onclick="addIngredient('신라면 스프', 'sauce_shin')">
+              <span class="ing-icon">🧂</span>
+              <span>신라면 스프</span>
+            </button>
+            <button class="ing-btn" onclick="addIngredient('불닭 액상소스', 'sauce_buldak')">
+              <span class="ing-icon">🔥</span>
+              <span>불닭 소스</span>
+            </button>
+            <button class="ing-btn" onclick="addIngredient('짜파게티 스프', 'sauce_jjapa')">
+              <span class="ing-icon">🍫</span>
+              <span>짜파게티 스프</span>
+            </button>
+            <button class="ing-btn" onclick="addIngredient('너구리 스프', 'sauce_neoguri')">
+              <span class="ing-icon">🦝</span>
+              <span>너구리 스프</span>
+            </button>
+            <button class="ing-btn" onclick="addIngredient('진라면 스프', 'sauce_jin')">
+              <span class="ing-icon">🔴</span>
+              <span>진라면 스프</span>
+            </button>
+            <button class="ing-btn" onclick="addIngredient('안성탕면 스프', 'sauce_anseong')">
+              <span class="ing-icon">🟠</span>
+              <span>안성탕면 스프</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Toppings Shelf -->
+        <div class="shelf-section">
+          <div class="shelf-title">🥬 [고명] 특별 토핑</div>
+          <div class="ingredient-grid">
+            <button class="ing-btn" onclick="addIngredient('계란', 'topping')">
+              <span class="ing-icon">🥚</span>
+              <span>계란</span>
+            </button>
+            <button class="ing-btn" onclick="addIngredient('송송 파', 'topping')">
+              <span class="ing-icon">🥬</span>
+              <span>송송 파</span>
+            </button>
+            <button class="ing-btn" onclick="addIngredient('다시마', 'topping')">
+              <span class="ing-icon">🌿</span>
+              <span>다시마</span>
+            </button>
+            <button class="ing-btn" onclick="addIngredient('올리브유', 'topping')">
+              <span class="ing-icon">🫒</span>
+              <span>올리브유</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start Overlay -->
+    <div class="overlay" id="start-modal">
+      <div class="modal">
+        <div style="font-size: 50px;">👨‍🍳🍜</div>
+        <div class="modal-title">세현이의 라면교실</div>
+        <p style="font-size: 14px; line-height: 1.6; color: #555;">
+          <b>⏰ 제한시간 3분 (180초)!</b><br>
+          요구되는 라면에 맞게 <b>[물 + 면 + 전용스프]</b>를 넣고<br>
+          <b>[목표 불 세기]</b>로 딱 맞춰 끓여서 최대한 많은 라면을 제출하세요!
+        </p>
+        <button class="btn-action" onclick="startGame()">3분 타임어택 시작! 🚀</button>
+      </div>
+    </div>
+
+    <!-- Single Round Evaluation Modal -->
+    <div class="overlay hidden" id="result-modal">
+      <div class="modal">
+        <div id="result-icon" style="font-size: 48px;">🎉</div>
+        <div class="modal-title" id="result-status">CI Test Passed!</div>
+        <div class="total-score-badge" id="round-score-text">100점</div>
+        
+        <div class="score-breakdown" id="score-details">
+          <!-- Score details generated dynamically -->
+        </div>
+
+        <button class="btn-action" onclick="nextRound()">다음 라면 만들기 🍜</button>
+      </div>
+    </div>
+
+    <!-- Final Overall Game Over Modal -->
+    <div class="overlay hidden" id="gameover-modal">
+      <div class="modal">
+        <div style="font-size: 50px;" id="final-icon">🏆</div>
+        <div class="modal-title">⏰ 3분 타임어택 종료!</div>
+        <p style="font-size: 14px; color: #666; margin: 4px 0;">세현이의 총 평가 결과</p>
+        <div class="total-score-badge" id="final-score-text">0점</div>
+        <div style="font-size: 15px; font-weight: bold; color: var(--primary-dark); margin-bottom: 8px;" id="final-grade">
+          "최고의 라면 마스터 셰프!"
+        </div>
+
+        <div class="history-list" id="final-history">
+          <!-- Final history items -->
+        </div>
+
+        <button class="btn-action" onclick="restartGame()">다시 도전하기 🔄</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Database of Recipes & Quests
+    const RECIPES = [
+      {
+        name: "신라면",
+        water: 500,
+        sauceId: "sauce_shin",
+        sauceName: "신라면 스프",
+        targetFire: 4,
+        targetCookTime: 5,
+        bonusToppings: ["계란", "송송 파"],
+        desc: "얼큰한 신라면! 물 500ml, 신라면 스프, 강불(4단)에서 5초간 끓이기!"
+      },
+      {
+        name: "불닭볶음면",
+        water: 300,
+        sauceId: "sauce_buldak",
+        sauceName: "불닭 액상소스",
+        targetFire: 5,
+        targetCookTime: 4,
+        bonusToppings: [],
+        desc: "화끈한 불닭! 물 300ml, 불닭 액상소스, 지옥불(5단)에서 4초간 끓이기!"
+      },
+      {
+        name: "짜파게티",
+        water: 350,
+        sauceId: "sauce_jjapa",
+        sauceName: "짜파게티 스프",
+        targetFire: 2,
+        targetCookTime: 6,
+        bonusToppings: ["올리브유"],
+        desc: "일요일엔 짜파게티! 물 350ml, 짜파게티 스프, 올리브유 필수, 중약불(2단) 6초!"
+      },
+      {
+        name: "너구리",
+        water: 500,
+        sauceId: "sauce_neoguri",
+        sauceName: "너구리 스프",
+        targetFire: 3,
+        targetCookTime: 5,
+        bonusToppings: ["다시마"],
+        desc: "통통한 너구리! 물 500ml, 너구리 스프, 다시마 필수, 중불(3단) 5초!"
+      },
+      {
+        name: "진라면 (매운맛)",
+        water: 500,
+        sauceId: "sauce_jin",
+        sauceName: "진라면 스프",
+        targetFire: 3,
+        targetCookTime: 5,
+        bonusToppings: ["계란"],
+        desc: "국민 라면 진라면! 물 500ml, 진라면 스프, 계란 고명, 중불(3단) 5초!"
+      },
+      {
+        name: "안성탕면",
+        water: 450,
+        sauceId: "sauce_anseong",
+        sauceName: "안성탕면 스프",
+        targetFire: 1,
+        targetCookTime: 6,
+        bonusToppings: ["송송 파"],
+        desc: "구수한 안성탕면! 물 450ml, 안성탕면 스프, 약불(1단)에서 6초 은근히 끓이기!"
+      }
+    ];
+
+    // Overall 3-Minute Timer
+    const TOTAL_GAME_TIME = 180; // 180 seconds (3 minutes)
+    let overallTimeRemaining = TOTAL_GAME_TIME;
+    let overallTimerInterval = null;
+
+    // Cooking State
+    let currentRecipe = null;
+    let waterAmount = 0;
+    let ingredients = [];
+    let currentFire = 0; // 0 (off) to 5
+    let cookedSeconds = 0; // How long pot was cooked
+    let cookInterval = null;
+    let isCooking = false;
+
+    // Cumulative Stats
+    let cookedRamenCount = 0;
+    let totalCumulativeScore = 0;
+    let ramenHistory = [];
+
+    // Elements
+    const elWater = document.getElementById('water');
+    const elPotContents = document.getElementById('pot-contents');
+    const elFlames = document.getElementById('flames');
+    const elFireStatus = document.getElementById('fire-status');
+    const elCookStatus = document.getElementById('cook-status');
+    const elSehyunDialogue = document.getElementById('sehyun-dialogue');
+    const elSehyunFace = document.getElementById('sehyun-face');
+    const elOverallTimer = document.getElementById('overall-timer');
+
+    function startGame() {
+      document.getElementById('start-modal').classList.add('hidden');
+      document.getElementById('gameover-modal').classList.add('hidden');
+      
+      overallTimeRemaining = TOTAL_GAME_TIME;
+      cookedRamenCount = 0;
+      totalCumulativeScore = 0;
+      ramenHistory = [];
+      updateHUD();
+
+      // Start 3-minute Master Timer
+      clearInterval(overallTimerInterval);
+      overallTimerInterval = setInterval(updateOverallTimer, 1000);
+      updateOverallTimer();
+
+      loadRandomQuest();
+    }
+
+    function restartGame() {
+      startGame();
+    }
+
+    function updateOverallTimer() {
+      overallTimeRemaining--;
+
+      if (overallTimeRemaining <= 0) {
+        overallTimeRemaining = 0;
+        endGame();
+      }
+
+      const mins = Math.floor(overallTimeRemaining / 60);
+      const secs = overallTimeRemaining % 60;
+      elOverallTimer.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function loadRandomQuest() {
+      // Reset pot state
+      waterAmount = 0;
+      ingredients = [];
+      currentFire = 0;
+      cookedSeconds = 0;
+      isCooking = true;
+
+      // Select random recipe
+      currentRecipe = RECIPES[Math.floor(Math.random() * RECIPES.length)];
+
+      // UI Reset
+      renderPot();
+      updateFireUI();
+      
+      // Quest Card UI
+      document.getElementById('quest-name').innerText = `📋 [PR #${cookedRamenCount + 1}] ${currentRecipe.name} 만들기`;
+      document.getElementById('quest-desc').innerHTML = `
+        <div><span class="badge">목표 물</span> <b>${currentRecipe.water}ml</b></div>
+        <div><span class="badge">전용 스프</span> <b>${currentRecipe.sauceName}</b></div>
+        <div><span class="badge">목표 불</span> <b>🔥 ${currentRecipe.targetFire}단</b></div>
+        <div><span class="badge">권장 시간</span> <b>${currentRecipe.targetCookTime}초 끓이기</b></div>
+        ${currentRecipe.bonusToppings.length ? `<div><span class="badge">추천 고명</span> ${currentRecipe.bonusToppings.join(', ')}</div>` : ''}
+      `;
+
+      elSehyunDialogue.innerText = `다음 라면은 ${currentRecipe.name}! 빠른 시간 내에 신속하게 완성해줘!`;
+      elSehyunFace.innerText = "👨‍🍳";
+
+      // Cooking Timer Interval (for fire calculation)
+      clearInterval(cookInterval);
+      cookInterval = setInterval(cookingLoop, 100);
+    }
+
+    function cookingLoop() {
+      if (!isCooking) return;
+
+      // If fire is on, increase cook progress
+      if (currentFire > 0) {
+        const speedMultiplier = 0.3 + (currentFire * 0.25);
+        cookedSeconds += 0.1 * speedMultiplier;
+      }
+
+      elCookStatus.innerText = `끓인 시간: ${cookedSeconds.toFixed(1)}초`;
+    }
+
+    // Ingredient & Water Handlers
+    function addWater(amount) {
+      if (!isCooking) return;
+      if (waterAmount + amount > 800) {
+        elSehyunDialogue.innerText = "으악! 물이 넘치겠어! 더 이상 못 넣어!";
+        return;
+      }
+      waterAmount += amount;
+      renderPot();
+    }
+
+    function addIngredient(name, type) {
+      if (!isCooking) return;
+      ingredients.push({ name, type });
+      renderPot();
+    }
+
+    function clearPot() {
+      if (!isCooking) return;
+      waterAmount = 0;
+      ingredients = [];
+      cookedSeconds = 0;
+      renderPot();
+      elSehyunDialogue.innerText = "냄비를 싹 비웠어! 다시 빠르게 도전해보자!";
+    }
+
+    // Fire Control
+    function setFire(level) {
+      if (!isCooking) return;
+      if (currentFire === level) {
+        currentFire = 0;
+      } else {
+        currentFire = level;
+      }
+      updateFireUI();
+    }
+
+    function updateFireUI() {
+      const buttons = document.querySelectorAll('.fire-btn');
+      buttons.forEach((btn, idx) => {
+        if (idx + 1 === currentFire) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      const pot = document.getElementById('pot');
+
+      if (currentFire === 0) {
+        elFireStatus.innerText = "🔥 불 세기: 끄기 (0단)";
+        elFlames.style.opacity = "0";
+        pot.classList.remove('cooking');
+      } else {
+        const names = ["1단 (약불)", "2단 (중약불)", "3단 (중불)", "4단 (강불)", "5단 (지옥불)"];
+        elFireStatus.innerText = `🔥 불 세기: ${names[currentFire - 1]}`;
+        elFlames.style.opacity = "1";
+        
+        const scale = 0.7 + (currentFire * 0.25);
+        elFlames.style.transform = `scale(${scale})`;
+        
+        if (waterAmount > 0) {
+          pot.classList.add('cooking');
+        }
+      }
+    }
+
+    function renderPot() {
+      const waterPercent = Math.min((waterAmount / 600) * 100, 95);
+      elWater.style.height = `${waterPercent}%`;
+
+      const hasSauce = ingredients.some(i => i.type.startsWith('sauce'));
+      if (hasSauce) {
+        elWater.style.backgroundColor = "rgba(225, 29, 72, 0.85)";
+      } else {
+        elWater.style.backgroundColor = "rgba(56, 189, 248, 0.75)";
+      }
+
+      elPotContents.innerHTML = '';
+      ingredients.forEach(item => {
+        const tag = document.createElement('div');
+        tag.className = 'content-tag';
+        tag.innerText = item.name;
+        elPotContents.appendChild(tag);
+      });
+    }
+
+    // Evaluation & Score Calculation (100 Point Scale)
+    function submitPR() {
+      if (!isCooking) return;
+      
+      clearInterval(cookInterval);
+      isCooking = false;
+      currentFire = 0;
+      updateFireUI();
+
+      let score = 0;
+      let breakdown = [];
+
+      // 1. Core Ingredients Check (Max 40 points)
+      const hasWater = waterAmount > 0;
+      const hasNoodle = ingredients.some(i => i.type === 'noodle');
+      const correctSauce = ingredients.find(i => i.type === currentRecipe.sauceId);
+      const wrongSauce = ingredients.find(i => i.type.startsWith('sauce_') && i.type !== currentRecipe.sauceId);
+
+      if (hasWater && hasNoodle && correctSauce) {
+        score += 40;
+        breakdown.push("✅ 기본 재료(물+면+전용스프) 완벽 투입 (+40점)");
+      } else {
+        let missing = [];
+        if (!hasWater) missing.push("물");
+        if (!hasNoodle) missing.push("면");
+        if (!correctSauce) missing.push(`전용스프(${currentRecipe.sauceName})`);
+        breakdown.push(`❌ 기본 재료 누락 (${missing.join(', ')}) (0점)`);
+      }
+
+      if (wrongSauce) {
+        score -= 15;
+        breakdown.push(`⚠️ 잘못된 다른 라면 스프 투입! (-15점)`);
+      }
+
+      // 2. Fire Level Accuracy (Max 20 points)
+      const fireDiff = Math.abs(currentFire - currentRecipe.targetFire);
+      if (fireDiff === 0) {
+        score += 20;
+        breakdown.push(`🔥 목표 불 세기(🔥 ${currentRecipe.targetFire}단) 정확히 적중! (+20점)`);
+      } else if (fireDiff === 1) {
+        score += 10;
+        breakdown.push(`🔥 불 세기 오차 1단계 아쉬움 (+10점)`);
+      } else {
+        breakdown.push(`❌ 목표 불 세기 미달 (0점)`);
+      }
+
+      // 3. Water Precision (Max 20 points)
+      const waterDiff = Math.abs(waterAmount - currentRecipe.water);
+      if (waterDiff === 0) {
+        score += 20;
+        breakdown.push(`💧 황금 물 비율 (${currentRecipe.water}ml) 정확! (+20점)`);
+      } else if (waterDiff <= 100) {
+        score += 10;
+        breakdown.push(`💧 물 양 살짝 오차 (${waterAmount}ml) (+10점)`);
+      } else {
+        breakdown.push(`❌ 물 비율 실패 (${waterAmount}ml) (0점)`);
+      }
+
+      // 4. Cooked Timing & Noodles Doneness (Max 20 points)
+      const cookDiff = Math.abs(cookedSeconds - currentRecipe.targetCookTime);
+      if (cookDiff <= 1.0) {
+        score += 20;
+        breakdown.push(`⏱️ 면발익힘 골든타임 (${cookedSeconds.toFixed(1)}초) 완벽! (+20점)`);
+      } else if (cookDiff <= 2.5) {
+        score += 10;
+        breakdown.push(`⏱️ 약간 불거나 덜 익음 (${cookedSeconds.toFixed(1)}초) (+10점)`);
+      } else {
+        breakdown.push(`❌ 조리 시간 조절 실패 (${cookedSeconds.toFixed(1)}초) (0점)`);
+      }
+
+      // Bonus Toppings
+      currentRecipe.bonusToppings.forEach(top => {
+        const hasTop = ingredients.some(i => i.name === top);
+        if (hasTop) {
+          score += 5;
+          breakdown.push(`🌟 추천 고명 [${top}] 추가 보너스! (+5점)`);
+        }
+      });
+
+      // Bound score 0~100
+      score = Math.max(0, Math.min(100, score));
+
+      // Save History & Stats
+      cookedRamenCount++;
+      totalCumulativeScore += score;
+      ramenHistory.push({
+        name: currentRecipe.name,
+        score: score
+      });
+      updateHUD();
+
+      // Check if overall time is already up
+      if (overallTimeRemaining <= 0) {
+        endGame();
+      } else {
+        showResultModal(score, breakdown);
+      }
+    }
+
+    function showResultModal(score, breakdown) {
+      const modal = document.getElementById('result-modal');
+      const iconEl = document.getElementById('result-icon');
+      const statusEl = document.getElementById('result-status');
+      const scoreEl = document.getElementById('round-score-text');
+      const detailsEl = document.getElementById('score-details');
+
+      scoreEl.innerText = `${score}점`;
+
+      if (score >= 90) {
+        iconEl.innerText = "🚀✨";
+        statusEl.innerText = "LGTM! 완벽한 PR 성공!";
+        elSehyunFace.innerText = "🤩";
+      } else if (score >= 70) {
+        iconEl.innerText = "👍🍜";
+        statusEl.innerText = "PR Approved (먹을만해요!)";
+        elSehyunFace.innerText = "😋";
+      } else if (score >= 50) {
+        iconEl.innerText = "😅💬";
+        statusEl.innerText = "Changes Requested (살짝 아쉬움)";
+        elSehyunFace.innerText = "🤔";
+      } else {
+        iconEl.innerText = "💥💥";
+        statusEl.innerText = "Build Failed (조리 실패!)";
+        elSehyunFace.innerText = "😱";
+      }
+
+      detailsEl.innerHTML = breakdown.map(line => `<div>${line}</div>`).join('');
+      modal.classList.remove('hidden');
+    }
+
+    function nextRound() {
+      document.getElementById('result-modal').classList.add('hidden');
+      if (overallTimeRemaining > 0) {
+        loadRandomQuest();
+      } else {
+        endGame();
+      }
+    }
+
+    function endGame() {
+      clearInterval(overallTimerInterval);
+      clearInterval(cookInterval);
+      isCooking = false;
+
+      document.getElementById('result-modal').classList.add('hidden');
+      
+      const gameoverModal = document.getElementById('gameover-modal');
+      const finalScoreEl = document.getElementById('final-score-text');
+      const finalGradeEl = document.getElementById('final-grade');
+      const finalIconEl = document.getElementById('final-icon');
+      const historyEl = document.getElementById('final-history');
+
+      finalScoreEl.innerText = `${totalCumulativeScore}점`;
+
+      if (totalCumulativeScore >= 500) {
+        finalIconEl.innerText = "🏆👑";
+        finalGradeEl.innerText = `"전설의 라면 마스터! 세현이가 인정한 1급 셰프!"`;
+      } else if (totalCumulativeScore >= 300) {
+        finalIconEl.innerText = "🌟🍜";
+        finalGradeEl.innerText = `"훌륭한 실력파 요리사! 손놀림이 대단해요!"`;
+      } else if (totalCumulativeScore >= 150) {
+        finalIconEl.innerText = "🍳✨";
+        finalGradeEl.innerText = `"수습 요리사 합격! 조금 더 연습해볼까요?"`;
+      } else {
+        finalIconEl.innerText = "💥🩹";
+        finalGradeEl.innerText = `"주방이 초토화되었습니다... 다시 도전해주세요!"`;
+      }
+
+      if (ramenHistory.length === 0) {
+        historyEl.innerHTML = `<div style="text-align:center; color:#999;">제출한 라면이 없습니다.</div>`;
+      } else {
+        historyEl.innerHTML = ramenHistory.map((item, idx) => `
+          <div class="history-item">
+            <span>#${idx + 1} ${item.name}</span>
+            <b>${item.score}점</b>
+          </div>
+        `).join('');
+      }
+
+      gameoverModal.classList.remove('hidden');
+    }
+
+    function updateHUD() {
+      document.getElementById('hud-count').innerText = cookedRamenCount;
+      document.getElementById('hud-score').innerText = totalCumulativeScore;
+    }
+  </script>
+</body>
+</html>
